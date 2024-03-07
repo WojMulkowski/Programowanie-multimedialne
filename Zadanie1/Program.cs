@@ -9,7 +9,7 @@ using Models;
 namespace PMLabs
 {
     //Implementacja interfejsu dostosowującego metodę biblioteki Glfw służącą do pozyskiwania adresów funkcji i procedur OpenGL do współpracy z OpenTK.
-    public class BC: IBindingsContext
+    public class BC : IBindingsContext
     {
         public IntPtr GetProcAddress(string procName)
         {
@@ -18,7 +18,7 @@ namespace PMLabs
     }
 
     class Program
-    {   
+    {
         public static void InitOpenGLProgram(Window window)
         {
             // Czyszczenie okna na kolor czarny
@@ -26,11 +26,13 @@ namespace PMLabs
 
             // Ładowanie programów cieniujących
             DemoShaders.InitShaders("Shaders\\");
-        }
 
-        public static void DrawScene(Window window)
+
+        }
+        static Torus torus = new Torus();
+        public static void DrawScene(Window window, float time)
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit| ClearBufferMask.DepthBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             mat4 V = mat4.LookAt(
                 new vec3(0.0f, 0.0f, -5.0f),
@@ -43,11 +45,19 @@ namespace PMLabs
             GL.UniformMatrix4(DemoShaders.spConstant.U("V"), 1, false, V.Values1D);
 
             mat4 M = mat4.Identity;
+            M *= mat4.Rotate(glm.Radians(60.0f * time / 2), new vec3(0.0f, 1.0f, 0.0f));
+            //M *= mat4.Translate(new vec3(0.0f, 2.0f, 0.5f));
+            //M *= mat4.Scale(new vec3(2.0f, 1.0f, 1.0f));
+
             GL.UniformMatrix4(DemoShaders.spConstant.U("M"), 1, false, M.Values1D);
 
             // TU RYSUJEMY
 
+            torus.drawWire();
+            torus.drawSolid();
+
             Glfw.SwapBuffers(window);
+
         }
 
         public static void FreeOpenGLProgram(Window window)
@@ -72,7 +82,7 @@ namespace PMLabs
 
             while (!Glfw.WindowShouldClose(window))
             {
-                DrawScene(window);
+                DrawScene(window, (float)Glfw.Time);
                 Glfw.PollEvents();
             }
 
@@ -81,7 +91,7 @@ namespace PMLabs
 
             Glfw.Terminate();
         }
-                    
+
 
     }
 }
